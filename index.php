@@ -1,5 +1,5 @@
 <?php
-include("FacebookDebugger.php");
+    include("conexaoBanco.php");
 
 if (isset($_GET['request']))
 {
@@ -9,118 +9,35 @@ if (isset($_GET['request']))
 
 if ($_SERVER['REQUEST_METHOD'] == "POST")
 {
+        $conexao = new ConexaoBanco();
+        $conexao->conecta();
+
+        $conexao->procuraProfissao("op1");
+        $conexao->procuraProfissao("op2");
+        $conexao->procuraProfissao("op3");
+        $conexao->procuraProfissao("op4");
+        $conexao->procuraProfissao("op5");
+
+        $conexao->desconecta();
     
     
-$servername = "localhost";
-$username = "root";
-$password = "chuck";
-$dbname = "popule";
+        $data = $_POST['dataimg'];
 
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-    echo "oi";
-} 
+        list($type, $data) = explode(';', $data);
+        list(, $data) = explode(',', $data);
+        $data = base64_decode($data);
 
+        if (!file_put_contents('./_imagens/' . $uid . '.png', $data))
+        {
+            die("Não foi possível salvar a imagem");
+        }
 
-
-$sql = "SELECT qtd FROM Profissoes WHERE profissao LIKE '".$_POST['op1']."'";
-$result = mysqli_query($conn, $sql);
-
-if (mysqli_num_rows($result) > 0) {
-    // output data of each row
-    while($row = mysqli_fetch_assoc($result)) {
-        $sql = "UPDATE Profissoes SET qtd=qtd+1 WHERE profissao='".$_POST['op1']."'";
-        $conn->query($sql);
+        $confirmacao = true;
     }
-} else {
-    $sql = "INSERT INTO Profissoes (qtd, profissao)
-                VALUES (1, '".$_POST['op1']."')";
-    $conn->query($sql);
-}
-
-$sql = "SELECT qtd FROM Profissoes WHERE profissao LIKE '".$_POST['op2']."'";
-$result = mysqli_query($conn, $sql);
-
-if (mysqli_num_rows($result) > 0) {
-    // output data of each row
-    while($row = mysqli_fetch_assoc($result)) {
-        $sql = "UPDATE Profissoes SET qtd=qtd+1 WHERE profissao='".$_POST['op2']."'";
-        $conn->query($sql);
-    }
-} else {
-    $sql = "INSERT INTO Profissoes (qtd, profissao)
-                VALUES (1, '".$_POST['op2']."')";
-    $conn->query($sql);
-}
-
-$sql = "SELECT qtd FROM Profissoes WHERE profissao LIKE '".$_POST['op3']."'";
-$result = mysqli_query($conn, $sql);
-
-if (mysqli_num_rows($result) > 0) {
-    // output data of each row
-    while($row = mysqli_fetch_assoc($result)) {
-        $sql = "UPDATE Profissoes SET qtd=qtd+1 WHERE profissao='".$_POST['op3']."'";
-        $conn->query($sql);    
-    }
-} else {
-    $sql = "INSERT INTO Profissoes (qtd, profissao)
-                VALUES (1, '".$_POST['op3']."')";
-    $conn->query($sql);
-}
-
-$sql = "SELECT qtd FROM Profissoes WHERE profissao LIKE '".$_POST['op4']."'";
-$result = mysqli_query($conn, $sql);
-
-if (mysqli_num_rows($result) > 0) {
-    // output data of each row
-    while($row = mysqli_fetch_assoc($result)) {
-        $sql = "UPDATE Profissoes SET qtd=qtd+1 WHERE profissao='".$_POST['op4']."'";
-        $conn->query($sql);
-    }
-} else {
-    $sql = "INSERT INTO Profissoes (qtd, profissao)
-                VALUES (1, '".$_POST['op4']."')";
-    $conn->query($sql);
-}
-
-$sql = "SELECT qtd FROM Profissoes WHERE profissao LIKE '".$_POST['op5']."'";
-$result = mysqli_query($conn, $sql);
-
-if (mysqli_num_rows($result) > 0) {
-    // output data of each row
-    while($row = mysqli_fetch_assoc($result)) {
-        $sql = "UPDATE Profissoes SET qtd=qtd+1 WHERE profissao='".$_POST['op5']."'";
-        $conn->query($sql);
-    }
-} else {
-    $sql = "INSERT INTO Profissoes (qtd, profissao)
-                VALUES (1, '".$_POST['op5']."')";
-    $conn->query($sql);
-}
-
-$conn->close();
-    
-    
-    $data = $_POST['dataimg'];
-
-    list($type, $data) = explode(';', $data);
-    list(, $data) = explode(',', $data);
-    $data = base64_decode($data);
-
-    if (!file_put_contents('./_imagens/' . $uid . '.png', $data))
+    else
     {
-        die("Não foi possível salvar a imagem");
+        $confirmacao = false;
     }
-
-    $confirmacao = true;
-}
-else
-{
-    $confirmacao = false;
-}
 ?>
 <!DOCTYPE html>
 <html>
@@ -276,15 +193,8 @@ else
                     </div>
 
                     <?php
-                    $servername = "localhost";
-                    $username = "root";
-                    $password = "chuck";
-                    $dbname = "popule";
-
-                    // Create connection
-                    $conn = new mysqli($servername, $username, $password, $dbname);
-                    $sql = "SELECT DISTINCT profissao, SUM( qtd ) as qtd FROM  Profissoes GROUP BY profissao ORDER BY SUM(qtd) DESC";
-                    $result = mysqli_query($conn, $sql);
+                        $conexao->conecta();
+                        $result = $conexao->preencheTabela();
                     ?>
                     
                     <script>
